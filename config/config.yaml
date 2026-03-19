@@ -1,0 +1,120 @@
+# Configuration for extract_reports notebook
+
+# Name
+dataset_shortname: "PARHAF"
+dataset_name: "PARHAF - PARTAGES - Reports of fictional patients - Core only"
+dataset_version: "1.0.0"
+dataset_licenses : 
+  - "CC BY 4.0"
+  - "Etalab 2.0"
+dataset_license_urls: 
+  - "https://creativecommons.org/licenses/by/4.0/"
+  - "https://www.etalab.gouv.fr/wp-content/uploads/2018/11/open-licence.pdf"
+dataset_description: "Extraction of synthetic reports from the PARTAGES project, 'core only' ('general pool'). This pool contains
+  all documents not assigned to a specific clinical use case (CU). 
+  'suggested_scenario' is the scenario that was suggested to the writer.
+  'structured_abstract' is an optional and uncurated abstract filled by the writer, it must be considered
+  with care as it may not reflect the actual content of the report. Please read documentation for
+  full understanding of the fields."
+dataset_split_description: "**Note for users interested in the PARTAGES use cases** on pseudonymisation, coding, oncology, and infectiology:
+  This dataset contains **unlabeled data only**. Labeled versions are available in separate datasets on the same platform.
+  Besides, **the documents for the test set of all use cases are excluded.** 
+  They will remain under embargo to enable future evaluations under controlled conditions, 
+  limiting the risk of LLM contamination through prior data exposure. 
+  Please contact us if you wish to get access to the test set to evaluate your system."
+
+
+dataset_properties:
+  language: 
+    - fr
+  language_creators:
+    - expert-generated
+  multilinguality:
+    - monolingual
+  size_categories:
+    - 10K<n<100K
+  source_datasets:
+    - original  
+  tags:
+    - medical
+    - clinical reports
+
+changelog_file: "./config/CHANGELOG.md"
+readme_template_file: "./config/README_template.md"
+
+# Input modes:
+#  - "local": the original docx documents are stored locally
+#  - "Google drive": the original docx documents are stored in a Google drive
+input_mode: "Google drive"
+
+
+# Configuration for the mode "Google drive"
+drive_mode:
+  # Credential file for accessing Google drive
+  google_credentials_file: "GOOGLE CREDENTIALS FILE PATH" 
+
+  # Metadata_file: name of the Excel file containing information about the files to extract
+  #                    (identifiers, path, authors, etc.)
+  # metadata_file: "/home/tannier/Recherche/BPI_PARTAGES/data/2025-10-29 - CR relus/PARTAGES - WP6 - Statut par CR du corpus au 28_10.xlsx"
+  # metadata_file: "/home/tannier/Recherche/BPI_PARTAGES/data/2025-11-14 - CR pour CU1/PARTAGES - Liste CR CU1 à annoter.xlsx
+  # metadata_file: "/home/tannier/Recherche/BPI_PARTAGES/data/releases/CU5a/PARTAGES - Liste CR CU5a à annoter.xlsx"
+  # metadata_file: "/home/tannier/Recherche/BPI_PARTAGES/data/2025-11-27 - test CU6/PARTAGES - Liste 4 CR CU6 test à annoter.xlsx"
+  # metadata_file: "/home/tannier/Recherche/BPI_PARTAGES/data/releases/CU5b/PARTAGES - Liste CR CU5b à annoter.xlsx"
+  # metadata_file: "/home/tannier/Recherche/BPI_PARTAGES/data/releases/CU1/PARTAGES-Liste_CR_CU1_a_annoter.xlsx"
+  metadata_file: "/home/tannier/Recherche/BPI_PARTAGES/data/releases/tout/PARTAGES - WP6 - Liste des 5009 CR relus.xlsx"  
+  # metadata_file: null
+
+  # Filtering function to apply to the metadata file
+  # must be an existing function from module filter.py
+  # filter: "filter_raw_to_annotate"
+  filter: filter_reviewed_raw
+  # filter: "filter_reviewed_CU6"
+  # filter: filter_core_only
+  # filter: filter_entire_training_set
+  # filter: null
+
+  # Names of the columns of interest within the metadata Excel file
+  specialty_column_name: "Spécialité"
+  status_column_name: "Statut document"
+  doc_link_column_name: "Lien du CR"
+  id_column_name: "ID"
+  author_column_name: "TRG rédacteur"
+  reviewer_column_name: "TRG relecteur"
+  category_column_name: "Catégorie"
+  pool_column_name: "CU / Pool Général"
+  split_column_name: "TRAIN / TEST (CU only)"
+
+# in_directory
+# In "local" mode, this is the directory where to look for reports -> should exist
+# In "Google drive" mode, the downloaded reports will be stored temporarily here -> should not exist or be empty
+# in_directory: "/home/tannier/Recherche/BPI_PARTAGES/data/2026-01-06 - Echantillon de 20 CR fictifs"
+in_directory: "/home/tannier/Recherche/BPI_PARTAGES/data/releases/tout/docx"
+
+# Two results: an output directory where the processed reports will be copied, and a JSON file with the patient metadata
+out_directory: "./final"
+out_json_file: "./final/patients.json"
+
+# Huggingface dataset configuration
+hf_dataset: True # Whether to push the dataset to HuggingFace
+hf_dataset_name: "LIMICS/PARHAF" # Name of the HuggingFace dataset
+# hf_dataset_name: "HealthDataHub/PARHAF" # Name of the HuggingFace dataset
+hf_data_directory: "./huggingface_extra_data" # Directory containing extra files to push to HuggingFace 
+paper_url: "none" # URL of the paper describing the dataset, to add to HuggingFace metadata
+
+file_extensions:
+  - ".docx"
+
+# Add dianostic codes to the structured abstract (JSON metadata)
+add_diagnostic_codes: False
+
+# Add word count to the metadata
+add_word_count: True
+
+# Whether to overwrite existing output files
+overwrite: False
+
+# Whether to extract only one report per patient (randomly chosen if multiple reports exist)
+one_report_per_patient: False
+
+logdir: "./log" # null # "./log"
+# logdir: null

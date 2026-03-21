@@ -7,7 +7,7 @@ import tempfile
 from collections import defaultdict
 import json
 from datasets import DatasetBuilder
-from .normalization import MEDICAL_SPECIALTIES_FR_EN
+from reports_extractor.normalization import MEDICAL_SPECIALTIES_FR_EN
 import os
 from typing import Any, Dict, Iterable, List, Tuple
 from slugify import slugify
@@ -284,10 +284,10 @@ def publish_dataset(
     logger.info(f"Publishing HuggingFace dataset from {json_corpus_file}...")
     hf_dataset_name = cfg["hf_dataset_name"]
     hf_extra_data_dir = cfg.get("hf_data_directory", None)
-    builder = Parhaf(json_corpus_file)
+    builder = Parhaf(json_corpus_file, cfg)
     builder.download_and_prepare()
     ds = builder.as_dataset()
-    ds.push_to_hub(hf_dataset_name)
+    ds.push_to_hub(hf_dataset_name, commit_message="v" + str(builder.version()))
 
     # Publish standalone data in a separate directory
     logger.info(

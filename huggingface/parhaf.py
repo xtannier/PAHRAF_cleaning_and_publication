@@ -18,23 +18,35 @@ class Parhaf(datasets.GeneratorBasedBuilder):
     BUILDER_CONFIGS = [
         ParhafConfig(
             name="default",
-            version=datasets.Version("1.0.0"),
-            description="Patient-level clinical corpus",
+            version=datasets.Version("0.0.0"),  # placeholder version
+            description="PARHAF",
         )
     ]
 
     DEFAULT_CONFIG_NAME = "default"
 
     # def __init__(self, json_path: str, hf_dataset_directory: str, *args, **kwargs):
-    def __init__(self, json_path: str, *args, **kwargs):
+    def __init__(self, json_path: str, config: Dict, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._json_path = json_path
+        version = config["dataset_version"]
+        description = config["dataset_description"]
+        self.config.version = datasets.Version(version)
+        self.config.description = description
+
         # self._hf_dataset_directory = hf_dataset_directory
+
+    def version(self) -> datasets.Version:
+        """Return the dataset version."""
+        return self.config.version  # type: ignore
 
     def _info(self) -> datasets.DatasetInfo:
         """Define dataset features."""
         return datasets.DatasetInfo(
-            description="Patient-level clinical dataset.",
+            description=(
+                self.config.description if self.config.description else "PARHAF"
+            ),
+            version=self.config.version,
             features=datasets.Features(
                 {
                     "id": datasets.Value("string"),

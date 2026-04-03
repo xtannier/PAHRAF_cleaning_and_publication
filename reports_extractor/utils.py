@@ -1,5 +1,5 @@
 from typing import Any, List, Dict, Optional
-from googleapiclient.discovery import build
+from googleapiclient.discovery import HttpError, build
 from googleapiclient.http import MediaIoBaseDownload
 from google_auth_oauthlib.flow import InstalledAppFlow
 import io
@@ -1054,6 +1054,10 @@ def document_generator(cfg: Dict):
         category_column_name = cfg["drive_mode"]["category_column_name"]
         pool_column_name = cfg["drive_mode"].get("pool_column_name", None)
         split_column_name = cfg["drive_mode"].get("split_column_name", None)
+        comments_column_name = cfg["drive_mode"].get("comments_column_name", None)
+        tag_reject_reason_column_name = cfg["drive_mode"].get(
+            "tag_reject_reason_column_name", None
+        )
 
         wb = openpyxl.load_workbook(metadata_file, data_only=True)
         sheets = wb.sheetnames
@@ -1067,6 +1071,8 @@ def document_generator(cfg: Dict):
         category_col_idx = 0
         pool_col_idx = -1
         split_col_idx = -1
+        comments_col_idx = -1
+        tag_reject_reason_col_idx = -1
 
         # n = 0
 
@@ -1094,6 +1100,22 @@ def document_generator(cfg: Dict):
                         split_col_idx = -1
                 else:
                     split_col_idx = -1
+                if comments_column_name is not None:
+                    try:
+                        comments_col_idx = headers.index(comments_column_name)
+                    except ValueError:
+                        comments_col_idx = -1
+                else:
+                    comments_col_idx = -1
+                if tag_reject_reason_column_name is not None:
+                    try:
+                        tag_reject_reason_col_idx = headers.index(
+                            tag_reject_reason_column_name
+                        )
+                    except ValueError:
+                        tag_reject_reason_col_idx = -1
+                else:
+                    tag_reject_reason_col_idx = -1
             else:
                 cells = list(row)
                 doc_link = cells[doc_link_col_idx]
@@ -1103,7 +1125,12 @@ def document_generator(cfg: Dict):
                 )
                 global_id = f"{slugify(specialty, lowercase=False)}-{local_id}"
                 doc_name = str(doc_link.value).split("/")[-1]
-                if filter_fn is None or filter_fn(cells):
+                if filter_fn is None:
+                    filter_result = FilterOutcome.ACCEPT_STRICT  # noqa: F405
+                else:
+                    filter_result = filter_fn(cells)
+                # Apply filter function if any (e.g., to only select documents with "relu" in the name)
+                if filter_result != FilterOutcome.REJECT:  # noqa: F405
                     # if str(status).strip().lower() == "relu" or filter == "none":
                     # n += 1
                     # if n < 1561:
@@ -1146,7 +1173,8 @@ def document_generator(cfg: Dict):
                         local_id=local_id,
                         author=author,
                         reviewer=reviewer,
-                        strict=True,
+                        strict=filter_result
+                        == FilterOutcome.ACCEPT_STRICT,  # noqa: F405
                         extension="docx",
                     )
                     extra_args = {}
@@ -1167,6 +1195,18 @@ def document_generator(cfg: Dict):
                                         split = "TEST"
                                         pool = f"{pool}_{split}"
                             extra_args["pool"] = pool
+                    if comments_col_idx >= 0:
+                        comments = cells[comments_col_idx].value
+                        if comments is not None:
+                            comments = str(comments).strip()
+                            if len(comments) > 0:
+                                extra_args["comments"] = comments
+                    if tag_reject_reason_col_idx >= 0:
+                        tag_reject_reason = cells[tag_reject_reason_col_idx].value
+                        if tag_reject_reason is not None:
+                            tag_reject_reason = str(tag_reject_reason).strip()
+                            if len(tag_reject_reason) > 0:
+                                extra_args["tag_reject_reason"] = tag_reject_reason
                     # match = FILEPATH_PATTERN.match(doc_name)
                     # if match:
                     # patient_id_in_specialty = str(match.group(3))
@@ -1209,7 +1249,7 @@ def document_generator(cfg: Dict):
                             )
                         except ValueError:
                             logger.error(
-                                f"{global_id} -- Could not extract file ID from link: {doc_link.hyperlink.target}"
+                                f"[{global_id}] -- Could not extract file ID from link: {doc_link.hyperlink.target}"
                             )
                             continue
                         # Create a destination subdirectory for the specialty if it does not exist
@@ -1231,11 +1271,20 @@ def document_generator(cfg: Dict):
                                 ), "google_credentials_file must be provided in the config"
                                 gdd = GoogleDriveDownloader(google_credentials_file)
 
-                            if gdd.download_google_drive_report(
-                                file_id,
-                                destination=destination,
-                            ):
-                                found.append(destination)
+                            try:
+                                if gdd.download_google_drive_report(
+                                    file_id,
+                                    destination=destination,
+                                ):
+                                    found.append(destination)
+                            except Exception as e:
+                                logger.error(
+                                    f"[{global_id}] -- Error downloading file with ID {file_id} to destination {destination}, from Google Drive: {str(e)}"
+                                )
+                                if os.path.exists(destination):
+                                    os.remove(
+                                        destination
+                                    )  # Remove the file if it was partially downloaded
                     if not len(found):
                         logger.error(
                             f"{global_id} -- No file found for patient ID {local_id} in specialty {specialty}."

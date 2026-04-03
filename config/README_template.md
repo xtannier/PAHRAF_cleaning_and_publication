@@ -5,17 +5,22 @@
 # Dataset Card for {{dataset_shortname}}
 
 <div align="center">
-
-
 <p>
-  <a href="https://www.health-data-hub.fr/actualites/democratiser-lia-generative-en-sante-letat-travers-france-2030-selectionne-le-projet" style="display:inline;"><img src="img/PARTAGES BASELINE_RVB.png" alt="Logo" style="height:20px;vertical-align:middle; margin-right:8px; display:inline; margin-bottom:0.2em; margin-top:0.2em;"; /></a>
-  <a href="https://www.etalab.gouv.fr/wp-content/uploads/2018/11/open-licence.pdf" style="display:inline;"><img src="img/Logo-licence-ouverte2.svg" style="height:20px; display:inline; margin-bottom:0.2em; margin-top:0.2em;"/></a>
-  <a href="https://creativecommons.org/licenses/by/4.0/deed.en" style="display:inline;"><img src="https://mirrors.creativecommons.org/presskit/buttons/88x31/png/by.png" style="height:20px; display:inline; margin-bottom:0.2em; margin-top:0.2em;"/></a>
-  <a href="{{paper_url}}"><img src="https://img.shields.io/badge/Paper-red?logo=arxiv&logoColor=white" style="height:20px; display:inline; margin-bottom:0.2em; margin-top:0.2em;"/></a>
+  <a href="https://huggingface.co/spaces/HealthDataHub/PARTAGES" style="display:inline;"><img src="img/PARTAGES BASELINE_RVB.png" alt="Logo" style="height:20px;vertical-align:middle; margin-right:8px; display:inline; margin-bottom:0.2em; margin-top:0.2em;"  title="PARTAGES project"; /></a>
+  <a href="https://www.etalab.gouv.fr/wp-content/uploads/2018/11/open-licence.pdf" style="display:inline;" title="Etalab 2.0 license"><img src="img/Logo-licence-ouverte2.svg" style="height:20px; display:inline; margin-bottom:0.2em; margin-top:0.2em;"/></a>
+  <a href="https://creativecommons.org/licenses/by/4.0/deed.en" style="display:inline;"><img src="https://mirrors.creativecommons.org/presskit/buttons/88x31/png/by.png" style="height:20px; display:inline; margin-bottom:0.2em; margin-top:0.2em;" title="CC BY 4.0 license"/></a>
+  <a href="{{paper_url}}"><img src="https://img.shields.io/badge/Paper-red?logo=arxiv&logoColor=white" style="height:20px; display:inline; margin-bottom:0.2em; margin-top:0.2em;" title="Paper"/></a>
 </p>
 </div>
 
 {{TABLE_OF_CONTENTS}}
+
+## Reporting Issues & Contributing
+
+If you encounter any errors or inconsistencies in this dataset, please report them in the discussion section of the "Community" tab on Hugging Face.
+
+For more substantial contributions or collaboration opportunities, feel free to contact us directly.
+
 
 ## Dataset Description
 

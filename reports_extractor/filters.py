@@ -169,8 +169,8 @@ def filter_rejected_documents(row: List[Cell]) -> FilterOutcome:
     """
     status_cell = row[13]  # Assuming the "Status" column is the 14th column (index 12)
     review_status_cell = row[
-        19
-    ]  # Assuming the "Review status" column is the 20th column (index 19)
+        20
+    ]  # Assuming the "Review status" column is the 21th column (index 20)
     return (
         FilterOutcome.ACCEPT_LAX
         if status_cell.value == "Eliminé" and review_status_cell.value == "Terminé"
